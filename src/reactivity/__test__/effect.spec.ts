@@ -156,4 +156,21 @@ describe("effect", () => {
     obj.foo = 2
     expect(dummy).toBe(2)
   })
+
+  it('clean up', () => {
+    const state = reactive({
+      flag: true,
+      value: 1
+    })
+    let count = 1
+    effect(() => {
+      state.flag ? state.value : 'ok'
+      count++
+    })
+    expect(count).toBe(2)
+    state.flag = false
+    expect(count).toBe(3)
+    state.value = 5
+    expect(count).toBe(3)
+  })
 })
