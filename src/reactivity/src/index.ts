@@ -5,9 +5,20 @@ export {
   isTracking,
   enableTracking,
   resetTracking,
-  stop
+  stop,
+  trackEffects,
+  triggerEffects
 } from './effect'
 
 export {
   reactive
 } from './reactive'
+
+export {
+  ref,
+  isRef,
+  unRef,
+  proxyRefs,
+  trackRefValue,
+  triggerRefValue
+} from './ref'

@@ -1,4 +1,4 @@
-import { extend } from '../../shared';
+import { extend, isArray } from '../../shared';
 import { createDep } from './dep';
 
 let activeEffect: ReactiveEffect | undefined
@@ -96,10 +96,10 @@ export function track (target, key) {
   if (!dep) {
     depsMap.set(key, (dep = createDep()))
   }
-  trackEffect(dep)
+  trackEffects(dep)
 }
 
-export function trackEffect(dep) {
+export function trackEffects(dep) {
   if (!dep.has(activeEffect)) {
     dep.add(activeEffect!)
     activeEffect!.deps.push(dep)
@@ -121,11 +121,11 @@ export function trigger (target, key) {
       effects.push(...dep)
     }
   }
-  triggerEffect(createDep(effects))
+  triggerEffects(createDep(effects))
 }
 
-export function triggerEffect (dep) {
-  for (const effect of dep) {
+export function triggerEffects (dep) {
+  for (const effect of (isArray(dep) ? dep : [...dep])) {
     if (effect.scheduler) {
       effect.scheduler(effect)
     } else {

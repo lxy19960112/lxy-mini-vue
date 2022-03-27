@@ -5,3 +5,5 @@ export const hasChanged = (value: any, oldValue: any): boolean => {
 }
 
 export const extend = Object.assign
+
+export const isArray = Array.isArray
