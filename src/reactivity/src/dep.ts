@@ -1,3 +1,3 @@
-export function createDep (dep?) {
-  return new Set(dep)
+export function createDep (effects?) {
+  return new Set(effects)
 }

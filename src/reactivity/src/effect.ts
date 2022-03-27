@@ -100,29 +100,36 @@ export function track (target, key) {
 }
 
 export function trackEffect(dep) {
-  activeEffect.deps.push(dep)
-  dep.add(activeEffect!)
+  if (!dep.has(activeEffect)) {
+    dep.add(activeEffect!)
+    activeEffect!.deps.push(dep)
+  }
 }
 
 export function trigger (target, key) {
+  let deps: Array<any> = []
   const depsMap = targetMap.get(target)
   if (!depsMap) {
     return
   }
-  const deps = depsMap.get(key)
-  if (!deps) {
-    return
+  const dep = depsMap.get(key)
+  deps.push(dep)
+
+  const effects: Array<any> = []
+  for (const dep of deps) {
+    if (dep) {
+      effects.push(...dep)
+    }
   }
-  triggerEffect(deps)
+  triggerEffect(createDep(effects))
 }
 
-export function triggerEffect (deps) {
-  const depsToRun = new Set(deps)
-  depsToRun.forEach(dep => {
-    if (dep.scheduler) {
-      dep.scheduler(dep)
+export function triggerEffect (dep) {
+  for (const effect of dep) {
+    if (effect.scheduler) {
+      effect.scheduler(effect)
     } else {
-      dep.run()
+      effect.run()
     }
-  })
+  }
 }
