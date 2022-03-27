@@ -4,7 +4,8 @@ export {
   trigger,
   isTracking,
   enableTracking,
-  resetTracking
+  resetTracking,
+  stop
 } from './effect'
 
 export {

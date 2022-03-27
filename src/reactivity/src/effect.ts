@@ -1,4 +1,5 @@
 import { extend } from '../../shared';
+import { createDep } from './dep';
 
 let activeEffect: ReactiveEffect | undefined
 const effectStack: ReactiveEffect[] = []
@@ -14,10 +15,20 @@ function cleanupEffect (effect) {
   }
 }
 
+export function stop(runner) {
+  const { effect } = runner
+  effect.stop()
+}
+
 export class ReactiveEffect {
   deps = []
+  active = true
+  onStop?: () => void
   constructor (public fn, scheduler?) {}
   run () {
+    if (!this.active) {
+      return this.fn()
+    }
     if (!effectStack.includes(this)) {
       try {
         cleanupEffect(this)
@@ -30,6 +41,15 @@ export class ReactiveEffect {
         const len = effectStack.length
         activeEffect = len > 0 ? effectStack[len - 1] : undefined
       }
+    }
+  }
+  stop () {
+    if (this.active) {
+      if (this.onStop) {
+        this.onStop()
+      }
+      cleanupEffect(this)
+      this.active = false
     }
   }
 }
@@ -74,8 +94,12 @@ export function track (target, key) {
   }
   let dep = depsMap.get(key)
   if (!dep) {
-    depsMap.set(key, (dep = new Set()))
+    depsMap.set(key, (dep = createDep()))
   }
+  trackEffect(dep)
+}
+
+export function trackEffect(dep) {
   activeEffect.deps.push(dep)
   dep.add(activeEffect!)
 }
@@ -89,6 +113,10 @@ export function trigger (target, key) {
   if (!deps) {
     return
   }
+  triggerEffect(deps)
+}
+
+export function triggerEffect (deps) {
   const depsToRun = new Set(deps)
   depsToRun.forEach(dep => {
     if (dep.scheduler) {
