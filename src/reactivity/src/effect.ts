@@ -1,3 +1,5 @@
+import { extend } from '../../shared';
+
 let activeEffect: ReactiveEffect | undefined
 const effectStack: ReactiveEffect[] = []
 
@@ -34,10 +36,12 @@ export class ReactiveEffect {
 
 export function effect (fn, options?) {
   const _effect = new ReactiveEffect(fn)
+  if(options) {
+    extend(_effect, options)
+  }
   if (!options?.lazy) {
     _effect.run()
   }
-
   const runner = _effect.run.bind(_effect)
   runner.effect = _effect
   return runner
@@ -87,6 +91,10 @@ export function trigger (target, key) {
   }
   const depsToRun = new Set(deps)
   depsToRun.forEach(dep => {
-    dep.run()
+    if (dep.scheduler) {
+      dep.scheduler(dep)
+    } else {
+      dep.run()
+    }
   })
 }

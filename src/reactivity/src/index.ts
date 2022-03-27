@@ -1,5 +1,10 @@
 export {
-  effect
+  effect,
+  track,
+  trigger,
+  isTracking,
+  enableTracking,
+  resetTracking
 } from './effect'
 
 export {
