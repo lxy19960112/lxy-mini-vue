@@ -1,41 +1,51 @@
 let activeEffect
+export class ReactiveEffect {
+  public deps = []
+  public runner
+  constructor (public fn, scheduler?) {
+    try {
+      const effectFn = () => {
+        activeEffect = this
+        return fn()
+      }
+      this.runner = effectFn
+    } finally {}
+  }
+  run () {
+    this.runner()
+  }
+}
 
 export function effect (fn, options?) {
-  try {
-    const effectFn = () => {
-      activeEffect = fn
-      return fn()
-    }
-    effectFn()
-  } finally {
-    // activeEffect = null
+  const _effect = new ReactiveEffect(fn)
+  if (!options?.lazy) {
+    _effect.run()
   }
 }
 
 const targetMap = new WeakMap()
 export function track (target, key) {
-  let maps = targetMap.get(target)
-  if (!maps) {
-    targetMap.set(target, (maps = new Map()))
+  let depsMap = targetMap.get(target)
+  if (!depsMap) {
+    targetMap.set(target, (depsMap = new Map()))
   }
-  let deps = maps.get(key)
-  if (!deps) {
-    maps.set(key, (deps = new Set()))
+  let dep = depsMap.get(key)
+  if (!dep) {
+    depsMap.set(key, (dep = new Set()))
   }
-  console.log('activeEffect :>> ', activeEffect);
-  deps.add(activeEffect)
+  dep.add(activeEffect!)
 }
 
 export function trigger (target, key) {
-  const maps = targetMap.get(target)
-  if (!maps) {
+  const depsMap = targetMap.get(target)
+  if (!depsMap) {
     return
   }
-  const deps = maps.get(key)
+  const deps = depsMap.get(key)
   if (!deps) {
     return
   }
   deps.forEach(dep => {
-    dep()
+    dep.run()
   })
 }

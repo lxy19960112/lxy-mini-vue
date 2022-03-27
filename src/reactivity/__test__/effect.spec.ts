@@ -15,4 +15,12 @@ describe("effect", () => {
     counter.num = 7;
     expect(dummy).toBe(7);
   });
+
+  it("test lazy", () => {
+    const fnSpy = jest.fn(() => {});
+    effect(fnSpy, {
+      lazy: true
+    });
+    expect(fnSpy).toHaveBeenCalledTimes(0);
+  })
 })
