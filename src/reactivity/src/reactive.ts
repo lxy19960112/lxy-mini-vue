@@ -1,4 +1,4 @@
-import { isObject } from '../../shared';
+import { isObject, hasChanged } from '../../shared';
 import { track, trigger } from './effect';
 
 export function reactive(target) {
@@ -13,11 +13,14 @@ function createReactiveObj (target) {
     get (target, key, receiver) {
       const res = Reflect.get(target, key, receiver)
       track(target, key)
-      return res
+      return isObject ? reactive(res) : res
     },
     set (target, key, value, receiver) {
+      const oldValue = target[key]
       const res = Reflect.set(target, key, value, receiver)
-      trigger(target, key)
+      if (hasChanged(value, oldValue)) {
+        trigger(target, key)
+      }
       return res
     }
   })

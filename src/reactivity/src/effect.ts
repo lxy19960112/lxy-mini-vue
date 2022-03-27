@@ -6,16 +6,13 @@ export class ReactiveEffect {
   run () {
     if (!effectStack.includes(this)) {
       try {
-        const effectFn = () => {
-          effectStack.push(activeEffect = this)
-          return this.fn()
-        }
-        effectFn()
+        effectStack.push(activeEffect = this)
+        return this.fn()
       } finally {
         effectStack.pop()
         const len = effectStack.length
         activeEffect = len > 0 ? effectStack[len - 1] : undefined
-    }
+      }
     }
   }
 }
@@ -25,6 +22,10 @@ export function effect (fn, options?) {
   if (!options?.lazy) {
     _effect.run()
   }
+
+  const runner = _effect.run.bind(_effect)
+  runner.effect = _effect
+  return runner
 }
 
 const targetMap = new WeakMap()
@@ -50,6 +51,6 @@ export function trigger (target, key) {
     return
   }
   deps.forEach(dep => {
-    dep.run()
+    dep && dep.run()
   })
 }
