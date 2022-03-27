@@ -1,18 +1,22 @@
-let activeEffect
+let activeEffect: ReactiveEffect | undefined
+const effectStack: ReactiveEffect[] = []
 export class ReactiveEffect {
-  public deps = []
-  public runner
-  constructor (public fn, scheduler?) {
-    try {
-      const effectFn = () => {
-        activeEffect = this
-        return fn()
-      }
-      this.runner = effectFn
-    } finally {}
-  }
+  deps = []
+  constructor (public fn, scheduler?) {}
   run () {
-    this.runner()
+    if (!effectStack.includes(this)) {
+      try {
+        const effectFn = () => {
+          effectStack.push(activeEffect = this)
+          return this.fn()
+        }
+        effectFn()
+      } finally {
+        effectStack.pop()
+        const len = effectStack.length
+        activeEffect = len > 0 ? effectStack[len - 1] : undefined
+    }
+    }
   }
 }
 
