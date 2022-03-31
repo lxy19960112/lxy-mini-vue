@@ -11,3 +11,6 @@ export const isArray = Array.isArray
 export const isFunction = object => typeof object === 'function'
 
 export const NOOP = () => void 0
+
+const hasOwnProperty = Object.prototype.hasOwnProperty
+export const hasOwn = (val, key) => hasOwnProperty.call(val, key)

@@ -1,5 +1,6 @@
-import { isObject, hasChanged } from '../../shared';
-import { track, trigger } from './effect';
+import { isObject, hasChanged, hasOwn } from '../../shared';
+import { track, trigger, ITERATE_KEY } from './effect';
+import { TriggerOpTypes } from './operations';
 
 export function reactive(target) {
   return createReactiveObj(target)
@@ -23,12 +24,27 @@ function createReactiveObj (target) {
       return isObject ? reactive(res) : res
     },
     set (target, key, value, receiver) {
+      const hadKey = hasOwn(target, key)
       const oldValue = target[key]
       const res = Reflect.set(target, key, value, receiver)
-      if (hasChanged(value, oldValue)) {
-        trigger(target, key)
+      if (!hadKey) {
+        trigger(target, TriggerOpTypes.ADD, key, value)
+      } else if (hasChanged(value, oldValue)) {
+        trigger(target, TriggerOpTypes.SET, key, value, oldValue)
       }
       return res
+    },
+    has (target, key) {
+      track(target, key)
+      return Reflect.has(target, key)
+    },
+    ownKeys (target) {
+      track(target, ITERATE_KEY)
+      return Reflect.ownKeys(target)
+    },
+    deleteProperty (target, key) {
+      trigger(target, TriggerOpTypes.DELETE, key)
+      return Reflect.deleteProperty(target, key)
     }
   })
   return proxy

@@ -1,8 +1,11 @@
 import { extend, isArray } from '../../shared';
 import { createDep } from './dep';
+import { TriggerOpTypes } from './operations';
 
 let activeEffect: ReactiveEffect | undefined
 const effectStack: ReactiveEffect[] = []
+
+export const ITERATE_KEY = Symbol('')
 
 function cleanupEffect (effect) {
   const { deps } = effect
@@ -106,7 +109,7 @@ export function trackEffects(dep) {
   }
 }
 
-export function trigger (target, key) {
+export function trigger (target, type, key?, vlaue?, oldValue?) {
   let deps: Array<any> = []
   const depsMap = targetMap.get(target)
   if (!depsMap) {
@@ -114,6 +117,11 @@ export function trigger (target, key) {
   }
   const dep = depsMap.get(key)
   deps.push(dep)
+
+  if(type === TriggerOpTypes.ADD || type === TriggerOpTypes.DELETE) {
+    const iterateDep = depsMap.get(ITERATE_KEY)
+    deps.push(iterateDep)
+  }
 
   const effects: Array<any> = []
   for (const dep of deps) {
