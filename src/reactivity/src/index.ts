@@ -11,7 +11,8 @@ export {
 } from './effect'
 
 export {
-  reactive
+  reactive,
+  isReadonly
 } from './reactive'
 
 export {
@@ -22,3 +23,7 @@ export {
   trackRefValue,
   triggerRefValue
 } from './ref'
+
+export {
+  computed
+} from './computed'

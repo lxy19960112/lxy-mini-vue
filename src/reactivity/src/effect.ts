@@ -24,7 +24,7 @@ export class ReactiveEffect {
   deps = []
   active = true
   onStop?: () => void
-  constructor (public fn, scheduler?) {}
+  constructor (public fn, public scheduler?) {}
   run () {
     if (!this.active) {
       return this.fn()

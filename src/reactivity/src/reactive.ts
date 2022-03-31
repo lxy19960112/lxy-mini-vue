@@ -5,6 +5,13 @@ export function reactive(target) {
   return createReactiveObj(target)
 }
 
+export const enum ReactiveFlags {
+  SKIP = '__v_skip',
+  IS_REACTIVE = '__v_isReactive',
+  IS_READONLY = '__v_isReadonly',
+  RAW = '__v_raw'
+}
+
 function createReactiveObj (target) {
   if (!isObject(target)) {
     return target
@@ -25,5 +32,9 @@ function createReactiveObj (target) {
     }
   })
   return proxy
+}
+
+export function isReadonly(value) {
+  return !!(value && value[ReactiveFlags.IS_READONLY])
 }
 
