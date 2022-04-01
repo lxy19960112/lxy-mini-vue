@@ -4,18 +4,18 @@ import { computed } from '../src/computed'
 import { effect } from '../src/effect'
 
 describe('reactivity/reactive', () => {
-  test('intercept operate in', () => {
-    const obj = reactive({
-      value: 1
-    })
-    const fn = jest.fn(() => {
-      'value' in obj
-    })
-    effect(fn)
-    expect(fn).toHaveBeenCalledTimes(1)
-    obj.value++
-    expect(fn).toHaveBeenCalledTimes(2)
-  })
+  // test('intercept operate in', () => {
+  //   const obj = reactive({
+  //     value: 1
+  //   })
+  //   const fn = jest.fn(() => {
+  //     'value' in obj
+  //   })
+  //   effect(fn)
+  //   expect(fn).toHaveBeenCalledTimes(1)
+  //   obj.value++
+  //   expect(fn).toHaveBeenCalledTimes(2)
+  // })
   test('intercept operate in', () => {
     const obj = reactive({
       value: 1
@@ -32,20 +32,20 @@ describe('reactivity/reactive', () => {
     delete obj.value
     expect(fn).toHaveBeenCalledTimes(3)
   })
-  test('raw', () => {
-    const obj = {}
-    const proto = { bar: 1 }
-    const child = reactive(obj)
-    const parent = reactive(proto)
-    Object.setPrototypeOf(child, parent)
-    const fn = jest.fn(() => {
-      console.log('child.bar :>> ', child.bar);
-    })
-    effect(fn)
-    expect(fn).toHaveBeenCalledTimes(1)
-    child.bar = 3
-    expect(fn).toHaveBeenCalledTimes(2)
-  })
+  // test('raw', () => {
+  //   const obj = {}
+  //   const proto = { bar: 1 }
+  //   const child = reactive(obj)
+  //   const parent = reactive(proto)
+  //   Object.setPrototypeOf(child, parent)
+  //   const fn = jest.fn(() => {
+  //     console.log('child.bar :>> ', child.bar);
+  //   })
+  //   effect(fn)
+  //   expect(fn).toHaveBeenCalledTimes(1)
+  //   child.bar = 3
+  //   expect(fn).toHaveBeenCalledTimes(2)
+  // })
   // test('Object', () => {
   //   const original = { foo: 1 }
   //   const observed = reactive(original)
