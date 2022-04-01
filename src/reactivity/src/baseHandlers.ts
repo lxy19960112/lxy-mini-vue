@@ -1,7 +1,8 @@
 import {
   reactive,
   ReactiveFlags,
-  toRaw
+  toRaw,
+  isReadonly
 } from './reactive'
 import {
   ITERATE_KEY,
@@ -18,6 +19,7 @@ import { TriggerOpTypes } from './operations';
 
 const get = createGetter(false, false)
 const shallowGet = createGetter(false, true)
+const readonlyGet = createGetter(true, false)
 
 function createGetter(isReadonly = false, shallow = false) {
   return function get (target, key, receiver) {
@@ -28,7 +30,12 @@ function createGetter(isReadonly = false, shallow = false) {
     if (key === ReactiveFlags.IS_REACTIVE) {
       return true
     }
-    track(target, key)
+    if (key === ReactiveFlags.IS_READONLY) {
+      return isReadonly
+    }
+    if (!isReadonly) {
+      track(target, key)
+    }
     if (shallow) {
       return res
     }
@@ -44,6 +51,9 @@ function createSetter(shallow = false) {
     const hadKey = hasOwn(target, key)
     const oldValue = target[key]
     const res = Reflect.set(target, key, value, receiver)
+    if (isReadonly(target)) {
+      return true
+    }
     if (toRaw(receiver) === target) {
       if (!hadKey) {
         trigger(target, TriggerOpTypes.ADD, key, value)
@@ -66,6 +76,9 @@ function ownKeys (target) {
 }
 
 function deleteProperty (target, key) {
+  if (isReadonly(target)) {
+    return true
+  }
   trigger(target, TriggerOpTypes.DELETE, key)
   return Reflect.deleteProperty(target, key)
 }
@@ -86,3 +99,14 @@ export const shallowReactiveHandlers = extend(
     set: shallowSet
   }
 )
+
+export const readonlyHandlers = {
+  get: readonlyGet,
+  set() {
+    return true
+  },
+  deleteProperty() {
+    return true
+  },
+}
+

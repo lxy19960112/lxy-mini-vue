@@ -1,7 +1,7 @@
 import { isObject, hasChanged, hasOwn } from '../../shared';
 import { track, trigger, ITERATE_KEY, } from './effect';
 import { TriggerOpTypes } from './operations';
-import { mutableHandlers, shallowReactiveHandlers } from './baseHandlers';
+import { mutableHandlers, shallowReactiveHandlers, readonlyHandlers } from './baseHandlers';
 
 export const enum ReactiveFlags {
   SKIP = '__v_skip',
@@ -32,11 +32,15 @@ function createReactiveObject (target, baseHandlers, proxyMap) {
 
 const reactiveMap = new WeakMap()
 const shallowReactiveMap = new WeakMap()
+const readonlyMap = new WeakMap()
 export function reactive(target) {
   return createReactiveObject(target, mutableHandlers, reactiveMap)
 }
 export function shallowReactive(target) {
   return createReactiveObject(target, shallowReactiveHandlers, shallowReactiveMap)
+}
+export function readonly(target) {
+  return createReactiveObject(target, readonlyHandlers, readonlyMap)
 }
 
 export function isReadonly(value) {
