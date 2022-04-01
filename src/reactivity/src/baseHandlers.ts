@@ -11,13 +11,15 @@ import {
 import {
   isObject,
   hasOwn,
-  hasChanged
+  hasChanged,
+  extend
 } from '../../shared'
 import { TriggerOpTypes } from './operations';
 
-const get = createGetter()
+const get = createGetter(false, false)
+const shallowGet = createGetter(false, true)
 
-function createGetter() {
+function createGetter(isReadonly = false, shallow = false) {
   return function get (target, key, receiver) {
     const res = Reflect.get(target, key, receiver)
     if (key === ReactiveFlags.RAW) {
@@ -27,13 +29,17 @@ function createGetter() {
       return true
     }
     track(target, key)
+    if (shallow) {
+      return res
+    }
     return isObject ? reactive(res) : res
   }
 }
 
 const set = createSetter()
+const shallowSet = createSetter(true)
 
-function createSetter() {
+function createSetter(shallow = false) {
   return function set (target, key, value, receiver) {
     const hadKey = hasOwn(target, key)
     const oldValue = target[key]
@@ -71,3 +77,12 @@ export const mutableHandlers = {
   ownKeys,
   deleteProperty
 }
+
+export const shallowReactiveHandlers = extend(
+  {},
+  mutableHandlers,
+  {
+    get: shallowGet,
+    set: shallowSet
+  }
+)

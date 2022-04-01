@@ -1,4 +1,4 @@
-import { effect, reactive, stop } from "../src";
+import { effect, reactive, stop, shallowReactive } from "../src";
 
 describe("effect", () => {
   it("should run the passed function once (wrapped by a effect)", () => {
@@ -230,6 +230,53 @@ describe("effect", () => {
     stop(runner);
     expect(onStop).toHaveBeenCalled();
   });
+})
+
+it('should not be triggered when set with the same proxy', () => {
+  // const obj = reactive({ foo: 1 })
+  // const observed: any = reactive({ obj })
+  // const fnSpy = jest.fn(() => observed.obj)
+
+  // effect(fnSpy)
+
+  // expect(fnSpy).toHaveBeenCalledTimes(1)
+  // observed.obj = obj
+  // expect(fnSpy).toHaveBeenCalledTimes(1)
+
+  // const obj2 = reactive({ foo: 1 })
+  // const observed2: any = shallowReactive({ obj2 })
+  // const fnSpy2 = jest.fn(() => observed2.obj2)
+
+  // effect(fnSpy2)
+
+  // expect(fnSpy2).toHaveBeenCalledTimes(1)
+  // observed2.obj2 = obj2
+  // expect(fnSpy2).toHaveBeenCalledTimes(1)
+  const obj = reactive({
+    foo: {
+      bar: 1
+    }
+  })
+  const fn = jest.fn(() => obj.foo.bar)
+  effect(fn)
+  expect(fn).toHaveBeenCalledTimes(1)
+  obj.foo = {bar: 2}
+  expect(fn).toHaveBeenCalledTimes(2)
+  obj.foo.bar = 3
+  expect(fn).toHaveBeenCalledTimes(3)
+
+  const obj2 = shallowReactive({
+    foo: {
+      bar: 1
+    }
+  })
+  const fn2 = jest.fn(() => obj2.foo.bar)
+  effect(fn2)
+  expect(fn2).toHaveBeenCalledTimes(1)
+  obj2.foo = {bar: 2}
+  expect(fn2).toHaveBeenCalledTimes(2)
+  obj2.foo.bar = 3
+  expect(fn2).toHaveBeenCalledTimes(2)
 })
 
 

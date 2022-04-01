@@ -8,7 +8,6 @@ class ComputedRefImpl {
   private _value!
   private _dirty = true
   public readonly effect
-
   public readonly __v_isRef = true
   public readonly [ReactiveFlags.IS_READONLY]: boolean
   constructor(getter, private readonly _setter, readonly) {
@@ -35,7 +34,6 @@ class ComputedRefImpl {
 
 export function computed(getterOrOptions) {
   let getter, setter
-  
   const onlyGetter = isFunction(getterOrOptions)
 
   if (onlyGetter) {
