@@ -134,10 +134,12 @@ export function trigger (target, type, key?, vlaue?, oldValue?) {
 
 export function triggerEffects (dep) {
   for (const effect of (isArray(dep) ? dep : [...dep])) {
-    if (effect.scheduler) {
-      effect.scheduler(effect)
-    } else {
-      effect.run()
+    if (effect !== activeEffect) {
+      if (effect.scheduler) {
+        effect.scheduler(effect)
+      } else {
+        effect.run()
+      }
     }
   }
 }

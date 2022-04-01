@@ -32,6 +32,20 @@ describe('reactivity/reactive', () => {
     delete obj.value
     expect(fn).toHaveBeenCalledTimes(3)
   })
+  test('raw', () => {
+    const obj = {}
+    const proto = { bar: 1 }
+    const child = reactive(obj)
+    const parent = reactive(proto)
+    Object.setPrototypeOf(child, parent)
+    const fn = jest.fn(() => {
+      console.log('child.bar :>> ', child.bar);
+    })
+    effect(fn)
+    expect(fn).toHaveBeenCalledTimes(1)
+    child.bar = 3
+    expect(fn).toHaveBeenCalledTimes(2)
+  })
   // test('Object', () => {
   //   const original = { foo: 1 }
   //   const observed = reactive(original)
@@ -46,19 +60,19 @@ describe('reactivity/reactive', () => {
   //   expect(Object.keys(observed)).toEqual(['foo'])
   // })
 
-  // test('proto', () => {
-  //   const obj = {}
-  //   const reactiveObj = reactive(obj)
-  //   expect(isReactive(reactiveObj)).toBe(true)
-  //   // read prop of reactiveObject will cause reactiveObj[prop] to be reactive
-  //   // @ts-ignore
-  //   const prototype = reactiveObj['__proto__']
-  //   const otherObj = { data: ['a'] }
-  //   expect(isReactive(otherObj)).toBe(false)
-  //   const reactiveOther = reactive(otherObj)
-  //   expect(isReactive(reactiveOther)).toBe(true)
-  //   expect(reactiveOther.data[0]).toBe('a')
-  // })
+  test('proto', () => {
+    const obj = {}
+    const reactiveObj = reactive(obj)
+    expect(isReactive(reactiveObj)).toBe(true)
+    // read prop of reactiveObject will cause reactiveObj[prop] to be reactive
+    // @ts-ignore
+    const prototype = reactiveObj['__proto__']
+    const otherObj = { data: ['a'] }
+    expect(isReactive(otherObj)).toBe(false)
+    const reactiveOther = reactive(otherObj)
+    expect(isReactive(reactiveOther)).toBe(true)
+    expect(reactiveOther.data[0]).toBe('a')
+  })
 
   // test('nested reactives', () => {
   //   const original = {

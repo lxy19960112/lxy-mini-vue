@@ -12,7 +12,8 @@ export {
 
 export {
   reactive,
-  isReadonly
+  isReadonly,
+  isReactive
 } from './reactive'
 
 export {
