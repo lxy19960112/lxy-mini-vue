@@ -3,10 +3,6 @@ import { track, trigger, ITERATE_KEY, } from './effect';
 import { TriggerOpTypes } from './operations';
 import { mutableHandlers } from './baseHandlers';
 
-export function reactive(target) {
-  return createReactiveObj(target)
-}
-
 export const enum ReactiveFlags {
   SKIP = '__v_skip',
   IS_REACTIVE = '__v_isReactive',
@@ -21,12 +17,22 @@ export interface Target {
   [ReactiveFlags.RAW]?: any
 }
 
-function createReactiveObj (target) {
+function createReactiveObject (target, baseHandlers, proxyMap) {
   if (!isObject(target)) {
     return target
   }
-  const proxy = new Proxy(target, mutableHandlers)
+  const existingProxy = proxyMap.get(target)
+  if (existingProxy) {
+    return existingProxy
+  }
+  const proxy = new Proxy(target, baseHandlers)
+  proxyMap.set(target, proxy)
   return proxy
+}
+
+const reactiveMap = new WeakMap()
+export function reactive(target) {
+  return createReactiveObject(target, mutableHandlers, reactiveMap)
 }
 
 export function isReadonly(value) {
