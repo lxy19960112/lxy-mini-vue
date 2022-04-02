@@ -1,7 +1,7 @@
 import { isObject, hasChanged, hasOwn } from '../../shared';
 import { track, trigger, ITERATE_KEY, } from './effect';
 import { TriggerOpTypes } from './operations';
-import { mutableHandlers, shallowReactiveHandlers, readonlyHandlers } from './baseHandlers';
+import { mutableHandlers, shallowReactiveHandlers, readonlyHandlers, shallowReadonlyHandlers } from './baseHandlers';
 
 export const enum ReactiveFlags {
   SKIP = '__v_skip',
@@ -17,8 +17,14 @@ export interface Target {
   [ReactiveFlags.RAW]?: any
 }
 
-function createReactiveObject (target, baseHandlers, proxyMap) {
+function createReactiveObject (target, isReadonly, baseHandlers, proxyMap) {
   if (!isObject(target)) {
+    return target
+  }
+  if (
+    target[ReactiveFlags.RAW] &&
+    !(isReadonly && target[ReactiveFlags.IS_REACTIVE])
+  ) {
     return target
   }
   const existingProxy = proxyMap.get(target)
@@ -33,14 +39,18 @@ function createReactiveObject (target, baseHandlers, proxyMap) {
 const reactiveMap = new WeakMap()
 const shallowReactiveMap = new WeakMap()
 const readonlyMap = new WeakMap()
+const shallowReadonlyMap = new WeakMap()
 export function reactive(target) {
-  return createReactiveObject(target, mutableHandlers, reactiveMap)
+  return createReactiveObject(target, false, mutableHandlers, reactiveMap)
 }
 export function shallowReactive(target) {
-  return createReactiveObject(target, shallowReactiveHandlers, shallowReactiveMap)
+  return createReactiveObject(target, false, shallowReactiveHandlers, shallowReactiveMap)
 }
 export function readonly(target) {
-  return createReactiveObject(target, readonlyHandlers, readonlyMap)
+  return createReactiveObject(target, true, readonlyHandlers, readonlyMap)
+}
+export function shallowReadonly(target) {
+  return createReactiveObject(target, true,shallowReadonlyHandlers, shallowReadonlyMap)
 }
 
 export function isReadonly(value) {

@@ -2,7 +2,8 @@ import {
   reactive,
   ReactiveFlags,
   toRaw,
-  isReadonly
+  isReadonly,
+  readonly
 } from './reactive'
 import {
   ITERATE_KEY,
@@ -20,26 +21,28 @@ import { TriggerOpTypes } from './operations';
 const get = createGetter(false, false)
 const shallowGet = createGetter(false, true)
 const readonlyGet = createGetter(true, false)
+const shallowReadonlyGet = createGetter(true, true)
 
 function createGetter(isReadonly = false, shallow = false) {
-  return function get (target, key, receiver) {
-    const res = Reflect.get(target, key, receiver)
-    if (key === ReactiveFlags.RAW) {
+  return function get (target, key: string | symbol, receiver: object) {
+    if (key === ReactiveFlags.IS_REACTIVE) {
+      return !isReadonly
+    } else if (key === ReactiveFlags.IS_READONLY) {
+      return isReadonly
+    } else if (key === ReactiveFlags.RAW) {
       return target
     }
-    if (key === ReactiveFlags.IS_REACTIVE) {
-      return true
-    }
-    if (key === ReactiveFlags.IS_READONLY) {
-      return isReadonly
-    }
+    const res = Reflect.get(target, key, receiver)
     if (!isReadonly) {
       track(target, key)
     }
     if (shallow) {
       return res
     }
-    return isObject ? reactive(res) : res
+    if (isObject(res)) {
+      return isReadonly ? readonly(res) : reactive(res)
+    }
+    return res
   }
 }
 
@@ -110,3 +113,10 @@ export const readonlyHandlers = {
   },
 }
 
+export const shallowReadonlyHandlers = extend(
+  {},
+  readonlyHandlers,
+  {
+    get: shallowReadonlyGet
+  }
+)

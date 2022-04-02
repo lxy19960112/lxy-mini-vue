@@ -1,4 +1,4 @@
-import { effect, reactive, stop, shallowReactive, readonly } from "../src";
+import { effect, reactive, stop, shallowReactive, readonly, shallowReadonly } from "../src";
 
 describe("effect", () => {
   it("should run the passed function once (wrapped by a effect)", () => {
@@ -278,20 +278,3 @@ it('should not be triggered when set with the same proxy', () => {
   obj2.foo.bar = 3
   expect(fn2).toHaveBeenCalledTimes(2)
 })
-
-it('test readonly', () => {
-  const obj = readonly({
-    foo: {
-      bar: 1
-    }
-  })
-  const fn = jest.fn(() => obj.foo.bar)
-  effect(fn)
-  expect(fn).toHaveBeenCalledTimes(1)
-  // obj.foo = {bar: 2}
-  // expect(fn).toHaveBeenCalledTimes(1)
-  obj.foo.bar = 3
-  expect(fn).toHaveBeenCalledTimes(2)
-})
-
-
