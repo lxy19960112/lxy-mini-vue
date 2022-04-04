@@ -3,20 +3,20 @@ import { ref, isRef } from '../src/ref'
 import { effect } from '../src/effect'
 
 describe('reactivity/reactive/Array', () => {
-  test('should make Array reactive', () => {
-    const original = [{ foo: 1 }]
-    const observed = reactive(original)
-    expect(observed).not.toBe(original)
-    expect(isReactive(observed)).toBe(true)
-    expect(isReactive(original)).toBe(false)
-    expect(isReactive(observed[0])).toBe(true)
-    // get
-    expect(observed[0].foo).toBe(1)
-    // has
-    expect(0 in observed).toBe(true)
-    // ownKeys
-    expect(Object.keys(observed)).toEqual(['0'])
-  })
+  // test('should make Array reactive', () => {
+  //   const original = [{ foo: 1 }]
+  //   const observed = reactive(original)
+  //   expect(observed).not.toBe(original)
+  //   expect(isReactive(observed)).toBe(true)
+  //   expect(isReactive(original)).toBe(false)
+  //   expect(isReactive(observed[0])).toBe(true)
+  //   // get
+  //   expect(observed[0].foo).toBe(1)
+  //   // has
+  //   expect(0 in observed).toBe(true)
+  //   // ownKeys
+  //   expect(Object.keys(observed)).toEqual(['0'])
+  // })
 
   // test('cloned reactive Array should point to observed values', () => {
   //   const original = [{ foo: 1 }]
@@ -26,6 +26,27 @@ describe('reactivity/reactive/Array', () => {
   //   expect(clone[0]).not.toBe(original[0])
   //   expect(clone[0]).toBe(observed[0])
   // })
+
+  test('arr value', () => {
+    const arr = reactive([1])
+    const fn = jest.fn(() => {
+      arr[0]
+    })
+    effect(fn)
+    expect(fn).toHaveBeenCalledTimes(1)
+    // arr.length = 1
+    // expect(fn).toHaveBeenCalledTimes(1)
+    // arr.length = 0
+    // expect(fn).toHaveBeenCalledTimes(2)
+    // arr[0] = 2
+    // expect(fn).toHaveBeenCalledTimes(3)
+    // arr[1] = 5
+    // expect(fn).toHaveBeenCalledTimes(4)
+    // arr[1] = 5
+    // expect(fn).toHaveBeenCalledTimes(2)
+    // arr[0] = 2
+    // expect(fn).toHaveBeenCalledTimes(3)
+  })
 
   // test('observed value should proxy mutations to original (Array)', () => {
   //   const original: any[] = [{ foo: 1 }, { bar: 2 }]

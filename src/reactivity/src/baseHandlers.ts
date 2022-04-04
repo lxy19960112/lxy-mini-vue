@@ -14,7 +14,8 @@ import {
   isObject,
   hasOwn,
   hasChanged,
-  extend
+  extend,
+  isArray
 } from '../../shared'
 import { TriggerOpTypes } from './operations';
 
@@ -51,12 +52,9 @@ const shallowSet = createSetter(true)
 
 function createSetter(shallow = false) {
   return function set (target, key, value, receiver) {
-    const hadKey = hasOwn(target, key)
     const oldValue = target[key]
+    const hadKey = isArray(target) ? Number(key) < target.length : hasOwn(target, key)
     const res = Reflect.set(target, key, value, receiver)
-    if (isReadonly(target)) {
-      return true
-    }
     if (toRaw(receiver) === target) {
       if (!hadKey) {
         trigger(target, TriggerOpTypes.ADD, key, value)

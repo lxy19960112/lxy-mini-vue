@@ -109,7 +109,7 @@ export function trackEffects(dep) {
   }
 }
 
-export function trigger (target, type, key?, vlaue?, oldValue?) {
+export function trigger (target, type, key?, value?, oldValue?) {
   let deps: Array<any> = []
   const depsMap = targetMap.get(target)
   if (!depsMap) {
@@ -118,9 +118,29 @@ export function trigger (target, type, key?, vlaue?, oldValue?) {
   const dep = depsMap.get(key)
   deps.push(dep)
 
-  if(type === TriggerOpTypes.ADD || type === TriggerOpTypes.DELETE) {
-    const iterateDep = depsMap.get(ITERATE_KEY)
-    deps.push(iterateDep)
+  if (isArray(target) && key === 'length') {
+    depsMap.forEach((dep, key) => {
+      if (key >= value) {
+        deps.push(dep)
+      }
+    })
+  }
+
+  switch (type) {
+    case TriggerOpTypes.ADD:
+      if (isArray(target)) {
+        const lengthDep = depsMap.get('length')
+        deps.push(lengthDep)
+      } else {
+        const iterateDep = depsMap.get(ITERATE_KEY)
+        deps.push(iterateDep)
+      }
+      break;
+    case TriggerOpTypes.DELETE:
+      const iterateDep = depsMap.get(ITERATE_KEY)
+      deps.push(iterateDep)
+    default:
+      break;
   }
 
   const effects: Array<any> = []
