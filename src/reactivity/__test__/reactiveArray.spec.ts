@@ -27,26 +27,18 @@ describe('reactivity/reactive/Array', () => {
   //   expect(clone[0]).toBe(observed[0])
   // })
 
-  test('arr value', () => {
-    const arr = reactive([1])
-    const fn = jest.fn(() => {
-      arr[0]
-    })
-    effect(fn)
-    expect(fn).toHaveBeenCalledTimes(1)
-    // arr.length = 1
-    // expect(fn).toHaveBeenCalledTimes(1)
-    // arr.length = 0
-    // expect(fn).toHaveBeenCalledTimes(2)
-    // arr[0] = 2
-    // expect(fn).toHaveBeenCalledTimes(3)
-    // arr[1] = 5
-    // expect(fn).toHaveBeenCalledTimes(4)
-    // arr[1] = 5
-    // expect(fn).toHaveBeenCalledTimes(2)
-    // arr[0] = 2
-    // expect(fn).toHaveBeenCalledTimes(3)
-  })
+  // test('for in', () => {
+  //   const arr = reactive([1])
+  //   const fn = jest.fn(() => {
+  //     for (let i in arr) {}
+  //   })
+  //   effect(fn)
+  //   expect(fn).toHaveBeenCalledTimes(1)
+  //   arr[1] = 5
+  //   expect(fn).toHaveBeenCalledTimes(2)
+  //   arr.length = 0
+  //   expect(fn).toHaveBeenCalledTimes(3)
+  // })
 
   // test('observed value should proxy mutations to original (Array)', () => {
   //   const original: any[] = [{ foo: 1 }, { bar: 2 }]
@@ -66,6 +58,56 @@ describe('reactivity/reactive/Array', () => {
   //   expect(observed[2]).toBe(reactiveValue)
   //   expect(original[2]).toBe(value)
   // })
+
+  // test("for of", () => {
+  //   const arr = reactive([1])
+  //   const fn = jest.fn(() => {
+  //     for (const i of arr) {}
+  //   })
+  //   effect(fn)
+  //   expect(fn).toHaveBeenCalledTimes(1)
+  //   arr[1] = 5
+  //   expect(fn).toHaveBeenCalledTimes(2)
+  //   arr.length = 0
+  //   expect(fn).toHaveBeenCalledTimes(3)
+  // })
+
+  // test("includes", () => {
+  //   // const arr = reactive([1,2,3])
+  //   // const fn = jest.fn(() => {
+  //   //   arr.includes(1)
+  //   // })
+  //   // effect(fn)
+  //   // expect(fn).toHaveBeenCalledTimes(1)
+  //   // arr[1] = 5
+  //   // expect(fn).toHaveBeenCalledTimes(2)
+
+  //   const obj = {}
+  //   const arr2 = reactive([obj])
+  //   expect(arr2.includes(arr2[0])).toBe(true)
+  //   expect(arr2.includes(obj)).toBe(true)
+  // })
+
+  test('Array identity methods should work with raw values', () => {
+    const raw = {}
+    const arr = reactive([{}, {}])
+    arr.push(raw)
+    expect(arr.indexOf(raw)).toBe(2)
+    // expect(arr.indexOf(raw, 3)).toBe(-1)
+    // expect(arr.includes(raw)).toBe(true)
+    // expect(arr.includes(raw, 3)).toBe(false)
+    // expect(arr.lastIndexOf(raw)).toBe(2)
+    // expect(arr.lastIndexOf(raw, 1)).toBe(-1)
+
+    // // should work also for the observed version
+    // const observed = arr[2]
+    // expect(arr.indexOf(observed)).toBe(2)
+    // expect(arr.indexOf(observed, 3)).toBe(-1)
+    // expect(arr.includes(observed)).toBe(true)
+    // expect(arr.includes(observed, 3)).toBe(false)
+    // expect(arr.lastIndexOf(observed)).toBe(2)
+    // expect(arr.lastIndexOf(observed, 1)).toBe(-1)
+  })
 
   // test('Array identity methods should work with raw values', () => {
   //   const raw = {}

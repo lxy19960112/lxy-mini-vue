@@ -24,6 +24,18 @@ const shallowGet = createGetter(false, true)
 const readonlyGet = createGetter(true, false)
 const shallowReadonlyGet = createGetter(true, true)
 
+const arrayInstrumentations = {}
+;['includes', 'indexOf', 'lastIndexOf'].forEach(key => {
+  const method = Array.prototype[key]
+  arrayInstrumentations[key] = function (...args) {
+    let res = method.apply(this, args)
+    if (!res || res === -1) {
+      res = method.apply(this[ReactiveFlags.RAW], args)
+    }
+    return res
+  }
+})
+
 function createGetter(isReadonly = false, shallow = false) {
   return function get (target, key: string | symbol, receiver: object) {
     if (key === ReactiveFlags.IS_REACTIVE) {
@@ -33,8 +45,11 @@ function createGetter(isReadonly = false, shallow = false) {
     } else if (key === ReactiveFlags.RAW) {
       return target
     }
+    if (isArray(target) && hasOwn(arrayInstrumentations, key)) {
+      return Reflect.get(arrayInstrumentations, key, receiver)
+    }
     const res = Reflect.get(target, key, receiver)
-    if (!isReadonly) {
+    if (!isReadonly && typeof key !== 'symbol') {
       track(target, key)
     }
     if (shallow) {
@@ -72,7 +87,7 @@ function has (target, key) {
 }
 
 function ownKeys (target) {
-  track(target, ITERATE_KEY)
+  track(target, isArray(target) ? 'length' : ITERATE_KEY)
   return Reflect.ownKeys(target)
 }
 
