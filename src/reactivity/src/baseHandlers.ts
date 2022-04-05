@@ -29,8 +29,11 @@ const arrayInstrumentations = {}
   const method = Array.prototype[key]
   arrayInstrumentations[key] = function (...args) {
     let res = method.apply(this, args)
+    for (let i = 0; i < this.length; i++) {
+      track(toRaw(this), i + '')
+    }
     if (!res || res === -1) {
-      res = method.apply(this[ReactiveFlags.RAW], args)
+      res = method.apply(toRaw(this), args)
     }
     return res
   }
