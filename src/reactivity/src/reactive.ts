@@ -1,6 +1,4 @@
-import { isObject, hasChanged, hasOwn } from '../../shared';
-import { track, trigger, ITERATE_KEY, } from './effect';
-import { TriggerOpTypes } from './operations';
+import { isObject } from '../../shared';
 import { mutableHandlers, shallowReactiveHandlers, readonlyHandlers, shallowReadonlyHandlers } from './baseHandlers';
 
 export const enum ReactiveFlags {

@@ -8,14 +8,17 @@ import {
 import {
   ITERATE_KEY,
   track,
-  trigger
+  trigger,
+  pauseTracking,
+  resetTracking
 } from './effect'
 import {
   isObject,
   hasOwn,
   hasChanged,
   extend,
-  isArray
+  isArray,
+  isIntegerKey
 } from '../../shared'
 import { TriggerOpTypes } from './operations';
 
@@ -24,20 +27,33 @@ const shallowGet = createGetter(false, true)
 const readonlyGet = createGetter(true, false)
 const shallowReadonlyGet = createGetter(true, true)
 
-const arrayInstrumentations = {}
-;['includes', 'indexOf', 'lastIndexOf'].forEach(key => {
-  const method = Array.prototype[key]
-  arrayInstrumentations[key] = function (...args) {
-    let res = method.apply(this, args)
-    for (let i = 0; i < this.length; i++) {
-      track(toRaw(this), i + '')
+const arrayInstrumentations = createArrayInstrumentations()
+
+function createArrayInstrumentations () {
+  const instrumentations = {}
+  ;['includes', 'indexOf', 'lastIndexOf'].forEach(key => {
+    instrumentations[key] = function (...args) {
+      let res = Array.prototype[key].apply(this, args)
+      for (let i = 0; i < this.length; i++) {
+        track(toRaw(this), i + '')
+      }
+      if (!res || res === -1) {
+        res = Array.prototype[key].apply(toRaw(this), args)
+      }
+      return res
     }
-    if (!res || res === -1) {
-      res = method.apply(toRaw(this), args)
+  })
+  ;(['push', 'pop', 'shift', 'unshift', 'splice'] as const).forEach(key => {
+    instrumentations[key] = function (this: unknown[], ...args: unknown[]) {
+      pauseTracking()
+      const res = Array.prototype[key].apply(toRaw(this), args)
+      resetTracking()
+      return res
     }
-    return res
-  }
-})
+  })
+  return instrumentations
+}
+
 
 function createGetter(isReadonly = false, shallow = false) {
   return function get (target, key: string | symbol, receiver: object) {
@@ -71,7 +87,7 @@ const shallowSet = createSetter(true)
 function createSetter(shallow = false) {
   return function set (target, key, value, receiver) {
     const oldValue = target[key]
-    const hadKey = isArray(target) ? Number(key) < target.length : hasOwn(target, key)
+    const hadKey = isArray(target) && isIntegerKey(key) ? Number(key) < target.length : hasOwn(target, key)
     const res = Reflect.set(target, key, value, receiver)
     if (toRaw(receiver) === target) {
       if (!hadKey) {

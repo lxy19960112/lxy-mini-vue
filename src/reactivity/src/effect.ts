@@ -81,6 +81,10 @@ export function enableTracking () {
   trackStack.push(shouldTrack = true)
 }
 
+export function pauseTracking () {
+  trackStack.push(shouldTrack = false)
+}
+
 export function resetTracking () {
   const last = trackStack.pop()
   shouldTrack = last === undefined ? true : last

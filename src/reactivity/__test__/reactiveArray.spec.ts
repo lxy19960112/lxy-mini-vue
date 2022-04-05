@@ -88,6 +88,29 @@ describe('reactivity/reactive/Array', () => {
     expect(arr2.includes(obj)).toBe(true)
   })
 
+  test("push", () => {
+    const arr = reactive([1,2,3])
+    effect(() => {
+      arr.push(1)
+    })
+    effect(() => {
+      arr.push(2)
+    })
+    // const fn = jest.fn(() => {
+    //   // arr.push(4)
+    //   arr[0]
+    // })
+    // effect(fn)
+    // expect(fn).toHaveBeenCalledTimes(1)
+    // arr[0] = 4
+    // expect(fn).toHaveBeenCalledTimes(2)
+    // const fn2 = jest.fn(() => {
+    //   arr.push(4)
+    // })
+    // effect(fn)
+    // effect(fn2)
+  })
+
   // test('Array identity methods should work with raw values', () => {
   //   const raw = {}
   //   const arr = reactive([{}, {}])
